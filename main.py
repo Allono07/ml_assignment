@@ -1,5 +1,5 @@
 import requests
-
+import matplotlib.pyplot as plt
 import pandas as pd
 from collections import defaultdict
 
@@ -118,3 +118,46 @@ print(f"Highest spike in Delhi (Deceased): {delhi_deceased_spike['date']} with {
 print(f"Answer 7- Active cases on 05-Sept-2020:")
 for state, active in active_cases.items():
     print(f"{state}: {active}")
+
+
+#Plotting:
+plt.figure(figsize=(14, 8))
+plt.stackplot(df['date'].unique(), total_confirmed_1, total_recovered_1, total_deceased_1,
+              labels=['Confirmed', 'Recovered', 'Deceased'], colors=['blue', 'yellow', 'red'])
+plt.title('Total COVID-19 Cases Trend in India (14-Mar-2020 to 05-Sept-2020)')
+plt.ylabel('Number of Cases')
+plt.legend(loc='upper left')
+plt.show()
+
+# Plot 2:
+delhi_data = df[(df['date'] >= sDate_2) & (df['date'] <= eDate_2)]
+
+delhi_confirmed = delhi_data[delhi_data['status'] == 'Confirmed']['dl'].astype(int).cumsum().values
+delhi_recovered = delhi_data[delhi_data['status'] == 'Recovered']['dl'].astype(int).cumsum().values
+delhi_deceased = delhi_data[delhi_data['status'] == 'Deceased']['dl'].astype(int).cumsum().values
+
+plt.figure(figsize=(14, 8))
+plt.stackplot(delhi_data['date'].unique(), delhi_confirmed, delhi_recovered, delhi_deceased,
+              labels=['Confirmed', 'Recovered', 'Deceased'], colors=['yellow', 'red', 'blue'])
+plt.title('COVID-19 Cases Trend in Delhi (14-Mar-2020 to 05-Sept-2020)')
+plt.ylabel('Number of Cases')
+plt.legend(loc='upper left')
+plt.show()
+
+# Plot 3:
+active_cases_data = []
+
+for date in delhi_data['date'].unique():
+    active = (
+        delhi_data[(delhi_data['date'] == date) & (delhi_data['status'] == 'Confirmed')]['dl'].astype(int).sum()
+        - delhi_data[(delhi_data['date'] == date) & (delhi_data['status'] == 'Recovered')]['dl'].astype(int).sum()
+        - delhi_data[(delhi_data['date'] == date) & (delhi_data['status'] == 'Deceased')]['dl'].astype(int).sum()
+    )
+    active_cases_data.append(active)
+
+plt.figure(figsize=(14, 8))
+plt.stackplot(delhi_data['date'].unique(), active_cases_data, labels=['Active Cases'], colors=['#FFA500'])
+plt.title('Active COVID-19 Cases Trend in Delhi (14-Mar-2020 to 05-Sept-2020)')
+plt.ylabel('Number of Active Cases')
+plt.legend(loc='upper left')
+plt.show()
